@@ -3,10 +3,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: hello-ingress
-  namespace: hello
+  namespace: py-hw
 spec:
+  ingressClassName: nginx
   rules:
-    - host: kubernetes.docker.internal
+    - host: kps.dev
       http:
         paths:
           - path: /
@@ -18,10 +19,16 @@ spec:
                   number: 80
 ---
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: py-hw
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: web
-  namespace: hello
+  namespace: py-hw
 spec:
   type: ClusterIP
   selector:
@@ -31,20 +38,20 @@ spec:
   - name: http
     protocol: TCP
     port: 80
-    targetPort: 50002
+    targetPort: 8890
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: hello
-  namespace: hello
+  namespace: py-hw
 spec:
   selector:
     matchLabels:
       app: web
       version: 2.0.0
-  replicas: 5
+  replicas: 2
   template:
     metadata:
       labels:
@@ -52,10 +59,16 @@ spec:
         version: 2.0.0
     spec:
       containers:
-      - name: web
-        image: "gcr.io/google-samples/hello-app:2.0"
-        env:
-        - name: "PORT"
-          value: "50002"
-        - name: "TEST"
-          value: "500"
+        - name: web
+          image: "python_helloworld_server:1.0"
+          ports:
+            - containerPort: 8891
+              protocol: TCP
+          imagePullPolicy: Never
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+            requests:
+              memory: "500Mi"
+              cpu: "500m"
