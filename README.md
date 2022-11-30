@@ -6,3 +6,6 @@ Docker Image creation for Python based application.
    a. Dockerfile Creation
    b. Image Creation
 2. How to run web server inside container
+Create Kubernetes services and ingress.
+deploy the application
+load balance python application using ingress
